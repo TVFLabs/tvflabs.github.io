@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  background-color: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+  color: #00aeef;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+}
+
+p {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+}
+
+form {
+	color: #000000
+}
+
+.mainStyle {
+	font-family: Arial, Helvetica, sans-serif;
+}
+</style>
+</head>
+<body>
+    <h1>Lasers & Feelings Character Sheet</h1>
+    <form id="characterSheetForm" class="mainStyle">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" style="background-color:#aad3e7; border: 0px;"><br><br>
+        
+        <label for="style">Style:</label>
+        <select id="style" name="style" style="background-color:#aad3e7; border: 0px;">
+            <option value="Alien">Alien</option>
+            <option value="Android">Android</option>
+			<option value="Dangerous">Dangerous</option>
+			<option value="Heroic">Heroic</option>
+			<option value="Hot-Shot">Hot-Shot</option>
+			<option value="Intrepid">Intrepid</option>
+			<option value="Savvy">Savvy</option>
+        </select><br><br>
+        
+        <label for="role">Role:</label>
+        <select id="role" name="role" style="background-color:#aad3e7; border: 0px;">
+            <option value="Doctor">Doctor</option>
+            <option value="Envoy">Envoy</option>
+            <option value="Engineer">Engineer</option>
+            <option value="Explorer">Explorer</option>
+			<option value="Pilot">Pilot</option>
+            <option value="Scientist">Scientist</option>
+            <option value="Soldier">Soldier</option>
+        </select><br><br>
+        
+        <label for="number">Number (2-5):</label>
+        <input type="number" id="number" name="number" min="2" max="5" style="background-color:#aad3e7; border: 0px;"><br><br>
+        
+        <label for="inventory">Inventory:</label>
+        <ul id="inventoryList" style="background-color:#aad3e7; border: 0px;">
+			<li>a Consortium uniform</li>
+            <li>a super-sweet space-phone-camera-communicator-scanner thing</li>
+			<li>a variable-beam phase pistol</li>
+		</ul>
+		
+        <input type="text" id="inventoryItem" placeholder="Item" style="background-color:#aad3e7; border: 0px;">
+        <button type="button" id="addItem" style="background-color:#007dac; border: 0px; color: #ffffff;">Add Item</button><br><br>
+        
+        <label for="goal">Character Goal:</label>
+        <textarea id="goal" name="goal" style="background-color:#aad3e7; border: 0px;"></textarea><br><br>
+    </form>
+    
+    <h2 style="color:#00aeef;" class="mainStyle">Roll Dice</h2>
+    <label for="numDice" class="mainStyle">Number of Dice:</label>
+    <input type="number" id="numDice" min="1" value="1" style="background-color:#aad3e7; border: 0px;">
+    <button type="button" id="rollDice" style="background-color:#007dac; border: 0px; color: #ffffff;">Roll Dice</button>
+    <p id="diceResults"></p>
+	
+	<h2 style="color:#00aeef;" class="mainStyle">Save/Load Character</h2>
+    <button type="button" id="saveCharacter" style="background-color:#007dac; border: 0px; color: #ffffff;">Save Character</button>
+	<label for="characters">Characters:</label>
+        <ul id="charactersList" style="background-color:#aad3e7; border: 0px;">
+		</ul>
+    <button type="button" id="loadCharacter" style="background-color:#007dac; border: 0px; color: #ffffff;">Load Character</button>
+    <button type="button" id="deleteCharacter" style="background-color:#007dac; border: 0px; color: #ffffff;">Delete Character</button>
+    
+    <script>
+        const form = document.getElementById("characterSheetForm");
+        const inventoryList = document.getElementById("inventoryList");
+        const addItemButton = document.getElementById("addItem");
+        const rollDiceButton = document.getElementById("rollDice");
+        const diceResults = document.getElementById("diceResults");
+        const saveCharacterButton = document.getElementById("saveCharacter");
+        const loadCharacterButton = document.getElementById("loadCharacter");
+        const deleteCharacterButton = document.getElementById("deleteCharacter");
+		const charactersList = document.getElementById("charactersList");
+
+
+        var selectedCharacter = ""
+		
+        addItemButton.addEventListener("click", addItem);
+        inventoryList.addEventListener("click", removeItem);
+        rollDiceButton.addEventListener("click", rollDice);
+        saveCharacterButton.addEventListener("click", saveCharacter);
+        loadCharacterButton.addEventListener("click", loadCharacter);
+        deleteCharacterButton.addEventListener("click", deleteCharacter);
+        charactersList.addEventListener("click", selectCharacter);
+
+        function selectCharacter(event) {  
+            if (event.target.tagName === "LI") {
+                const key = event.target.textContent;
+				selectedCharacter = key;
+            }
+            for (i = 0; i < charactersList.children.length; i++) {
+                if (charactersList.children[i].textContent == selectedCharacter) {
+                    charactersList.children[i].style.backgroundColor = "#00aeef";
+                }
+                else {
+                    charactersList.children[i].style.backgroundColor = "#aad3e7";
+                }
+            }
+        }
+
+        for (i = 0; i < localStorage.length; i++) {
+            addCharacter(localStorage.key(i))
+        }
+        
+        function addItem() {
+            const inventoryItem = document.getElementById("inventoryItem").value;
+            if (inventoryItem !== "") {
+                const li = document.createElement("li");
+                li.textContent = inventoryItem;
+                inventoryList.appendChild(li);
+                document.getElementById("inventoryItem").value = "";
+            }
+        }
+
+        function addCharacter(name) {
+            if (name !== "") {
+                const li = document.createElement("li");
+                li.textContent = name;
+                charactersList.appendChild(li);
+            }
+        }
+        
+        function removeItem(event) {
+            if (event.target.tagName === "LI") {
+                event.target.remove();
+            }
+        }
+      
+      function rollDice() {
+            const numDice = document.getElementById("numDice").value;
+            const results = [];
+            
+            for (let i = 0; i < numDice; i++) {
+                const rollResult = Math.floor(Math.random() * 6) + 1;
+                results.push(rollResult);
+            }
+            
+            diceResults.textContent = `Dice Results: ${results.join(", ")}`;
+        }
+		
+		 function saveCharacter() {
+            const characterData = {
+                name: document.getElementById("name").value,
+                style: document.getElementById("style").value,
+                role: document.getElementById("role").value,
+                number: document.getElementById("number").value,
+                inventory: Array.from(inventoryList.children).map(item => item.textContent),
+                goal: document.getElementById("goal").value,
+            };
+            
+            const json = JSON.stringify(characterData);/*
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = document.getElementById("name").value + ".json";
+            a.textContent = "Download Character Data";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);*/
+			
+            if (document.getElementById("name").value !== "") {
+                localStorage.setItem(document.getElementById("name").value, json);
+                addCharacter(document.getElementById("name").value)
+            }
+        }
+        
+        function loadCharacter() {
+                const key = selectedCharacter;
+				const file = localStorage.getItem(key);
+				if (file) {
+						const characterData = JSON.parse(file);
+						
+						document.getElementById("name").value = characterData.name;
+						document.getElementById("style").value = characterData.style;
+						document.getElementById("role").value = characterData.role;
+						document.getElementById("number").value = characterData.number;
+						
+						inventoryList.innerHTML = "";
+						characterData.inventory.forEach(item => {
+							const li = document.createElement("li");
+							li.textContent = item;
+							inventoryList.appendChild(li);
+						});
+						
+						document.getElementById("goal").value = characterData.goal;
+				}
+        }
+
+        function deleteCharacter() {
+            const key = selectedCharacter;
+			const file = localStorage.getItem(key);
+			if (file) {
+                for (i = 0; i < charactersList.children.length; i++) {
+                    if (charactersList.children[i].textContent == selectedCharacter) {
+                        charactersList.children[i].remove()
+                    }
+                }
+                localStorage.removeItem(key)
+                selectedCharacter = ""
+            }
+        }
+    </script>
+</body>
+</html>
+
+</html>
+
+
